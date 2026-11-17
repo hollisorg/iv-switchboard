@@ -1,0 +1,8 @@
+node_modules/
+out/
+dist/
+*.log
+
+# QA screenshots and live-read output stay local.
+qa/
+AGENTS.md

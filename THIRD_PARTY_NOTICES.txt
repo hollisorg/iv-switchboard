@@ -1,0 +1,31 @@
+IV Switchboard
+(c) 2026 Infinite Variance. Released under the MIT licence.
+
+IV Switchboard reads the usage records that Claude Code, Codex and Hermes already keep on
+your PC. It is not made by or affiliated with Anthropic, OpenAI, xAI or Nous Research. Prices
+shown are each provider's published API prices, for comparison only; they are not what
+your subscription costs.
+
+The idea came from codex-switch (https://github.com/joshp123/codex-switch). No code was
+copied from it, and IV Switchboard does not pool or switch accounts.
+
+IV Switchboard is built from the open-source software listed below. Full licence texts
+are in the "licenses" folder next to this file.
+
+------------------------------------------------------------------------------------
+Electron 44 and Chromium
+  Licence: MIT (Electron) and the Chromium licences
+  Licence text: LICENSE.electron.txt and LICENSES.chromium.html in the install folder
+  Source code: https://github.com/electron/electron
+
+electron-updater 6
+  Licence: MIT
+  Source code: https://github.com/electron-userland/electron-builder
+
+React and React DOM 19
+  Licence: MIT. licenses/React-MIT.txt
+
+Fonts: Barlow, Barlow Condensed, DM Sans, JetBrains Mono
+  Licence: SIL Open Font License 1.1
+  licenses/Barlow-OFL.txt, licenses/BarlowCondensed-OFL.txt, licenses/DMSans-OFL.txt,
+  licenses/JetBrainsMono-OFL.txt

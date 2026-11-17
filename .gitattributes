@@ -1,0 +1,6 @@
+# Keep text files with plain LF line endings on every checkout. The test fixtures are byte-exact
+# transcripts (readers track byte offsets), so a CRLF conversion would change them.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.webp binary

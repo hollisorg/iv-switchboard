@@ -1,0 +1,435 @@
+/* IV look, copied from IV Chat (its src/renderer/src/styles.css): ink, paper, red and
+   pink; Barlow Condensed for names and numbers, DM Sans for text, JetBrains Mono for labels and buttons. */
+:root {
+  --ink: #100c0e;
+  --ink-2: #19131a;
+  --ink-3: #241b22;
+  --deep: #0b0809;
+  --line: rgba(241, 237, 229, 0.12);
+  --line-strong: rgba(241, 237, 229, 0.28);
+  --paper: #f1ede5;
+  --paper-dim: rgba(241, 237, 229, 0.58);
+  --cream: #f4ecdc;
+  --pink: #f19dac;
+  --red: #f44859;
+  --display: 'Barlow Condensed', 'Barlow', Impact, sans-serif;
+  --body: 'DM Sans', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font: 400 14px/1.45 var(--body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+:focus-visible {
+  outline: 1.5px solid var(--pink);
+  outline-offset: 3px;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dim {
+  color: var(--paper-dim);
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+}
+
+/* ---------- header (IV Chat's .titlebar and .brand-logo) ---------- */
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  flex: none;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--ink);
+}
+
+.brand-logo {
+  height: 20px;
+  width: auto;
+  display: block;
+  -webkit-user-drag: none;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--deep);
+}
+
+.updated {
+  flex: 1;
+  min-width: 0;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: transparent;
+}
+
+.icon-btn:not(:disabled):hover {
+  border-color: var(--pink);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+}
+
+/* ---------- body ---------- */
+
+.scroll {
+  flex: 1;
+  min-height: 0; /* lets the flex child scroll instead of growing past the window */
+  overflow-y: auto;
+  padding: 12px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: var(--ink-3);
+}
+
+.periods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line-strong);
+}
+
+.periods button {
+  min-height: 44px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--paper-dim);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.periods button:last-child {
+  border-right: 0;
+}
+
+.periods button[aria-pressed='true'] {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ---------- cards (IV Chat's .card) ---------- */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--red);
+  background: var(--ink-2);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.card-name {
+  font: 800 24px/1 var(--display);
+  text-transform: uppercase;
+}
+
+.pill {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+}
+
+.spend {
+  text-align: right;
+}
+
+.spend-cost {
+  font: 700 24px/1 var(--display);
+}
+
+.spend-tokens {
+  margin-top: 4px;
+}
+
+.window {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.window-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.window-left {
+  font: 700 18px/1 var(--display);
+}
+
+.bar {
+  height: 6px;
+  background: var(--line);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--paper);
+}
+
+.bar.warn span {
+  background: var(--pink);
+}
+
+.bar.out span {
+  background: var(--red);
+}
+
+.alert {
+  color: var(--red);
+}
+
+.note {
+  margin: 0;
+  color: var(--paper-dim);
+  font-size: 13px;
+}
+
+.providers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.providers li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* ---------- buttons (IV Studio's .btn) ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  border: 1px solid var(--line-strong);
+  padding: 11px 16px;
+  background: transparent;
+  color: var(--paper);
+  font: 500 11.5px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn:not(:disabled):hover {
+  border-color: var(--pink);
+}
+
+.btn-primary {
+  border-color: var(--paper);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: var(--cream);
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--ink-3);
+}
+
+.confirm p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.path {
+  font-family: var(--mono);
+  font-size: 11px;
+  word-break: break-all;
+  color: var(--cream);
+}
+
+/* ---------- top tasks ---------- */
+
+.section-title {
+  margin: 6px 2px 0;
+}
+
+.tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.tasks li {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.task-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.task-cost {
+  text-align: right;
+  font: 700 16px/1 var(--display);
+}
+
+/* ---------- settings and footer ---------- */
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+
+/* The whole 44px row is the switch; the pill is only its picture. */
+.setting-toggle {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  flex: none;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--paper-dim);
+  transition: left 0.15s, background 0.15s;
+}
+
+.switch[data-on='true'] {
+  border-color: var(--pink);
+}
+
+.switch[data-on='true']::after {
+  left: 21px;
+  background: var(--pink);
+}
+
+.foot {
+  margin: 4px 2px 0;
+  line-height: 1.6;
+}
+
+.message {
+  margin: 0;
+  font-size: 13px;
+}
+
+.message.bad {
+  color: var(--red);
+}
