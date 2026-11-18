@@ -20,7 +20,10 @@ export const PRICES = {
     input: 0.1, cachedInput: 0.01, cacheWrite5m: 0.125, cacheWrite1h: 0.2, output: 0.5,
     long: { from: 100001, input: 0.5, cachedInput: 0.05, cacheWrite5m: 0.625, cacheWrite1h: 1, output: 2.5 }
   },
-  // OpenAI, Standard tier. Equal to the Codex credit rates at 25 credits per dollar. No cache-write charge.
+  // OpenAI, Standard tier. Equal to the Codex credit rates at 25 credits per dollar. OpenAI also lists
+  // 30-minute and 12-hour cache-write prices, but every Codex log checked (2026-11-18) records 0 cache writes.
+  'gpt-6.2-astra': { input: 8, cachedInput: 0.4, output: 40, long: { from: 272001, input: 16, cachedInput: 0.8, output: 60 } },
+  'gpt-6.2-sol': { input: 2, cachedInput: 0.1, output: 10, long: { from: 272001, input: 4, cachedInput: 0.2, output: 15 } },
   'gpt-6.1-sol': { input: 2, cachedInput: 0.1, output: 10, long: { from: 272001, input: 4, cachedInput: 0.2, output: 15 } },
   'gpt-6-astra': { input: 10, cachedInput: 1, output: 50, long: { from: 272001, input: 20, cachedInput: 2, output: 75 } },
   'gpt-6-sol': { input: 2, cachedInput: 0.2, output: 10, long: { from: 272001, input: 4, cachedInput: 0.4, output: 15 } },
@@ -31,7 +34,7 @@ export const PRICES = {
 
 export const PRICE_SOURCES = [
   { url: 'https://platform.claude.com/docs/en/about-claude/pricing', read: '2026-11-17', models: ['claude-opus-5-5', 'claude-opus-5', 'claude-fable-5-2', 'claude-haiku-5-5'] },
-  { url: 'https://developers.openai.com/api/docs/pricing', read: '2026-11-17', models: ['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6-sol', 'gpt-6.1-terra'] },
+  { url: 'https://developers.openai.com/api/docs/pricing', read: '2026-11-18', models: ['gpt-6.2-astra', 'gpt-6.2-sol', 'gpt-6.1-sol', 'gpt-6-astra', 'gpt-6-sol', 'gpt-6.1-terra'] },
   { url: 'https://docs.x.ai/docs/models', read: '2026-11-17', models: ['grok-4.6'] }
 ]
 

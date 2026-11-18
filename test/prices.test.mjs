@@ -10,7 +10,7 @@ test('every price names its source page and the day it was read', () => {
   for (const model of Object.keys(PRICES)) assert.ok(sourced.has(model), `${model} has a source`)
   for (const s of PRICE_SOURCES) {
     assert.match(s.url, /^https:\/\//)
-    assert.equal(s.read, '2026-11-17')
+    assert.match(s.read, /^\d{4}-\d{2}-\d{2}$/)
   }
 })
 
@@ -23,6 +23,13 @@ test('Codex input already includes cached input', () => {
 test('an OpenAI request over 272k input tokens is priced at the long-context rate', () => {
   close(costUsd('codex', { model: 'gpt-6-astra', input: 300000, cachedInput: 100000, output: 1000 }), (200000 * 20 + 100000 * 2 + 1000 * 75) / M)
   close(costUsd('codex', { model: 'gpt-6-astra', input: 272000, cachedInput: 0, output: 0 }), (272000 * 10) / M)
+})
+
+test('GPT-6.2 Astra and Sol are priced, including past 272k input tokens', () => {
+  close(costUsd('codex', { model: 'gpt-6.2-sol', input: 1000, cachedInput: 400, cacheWrite: 0, output: 50 }), (600 * 2 + 400 * 0.1 + 50 * 10) / M)
+  close(costUsd('codex', { model: 'gpt-6.2-astra', input: 1000, cachedInput: 400, cacheWrite: 0, output: 50 }), (600 * 8 + 400 * 0.4 + 50 * 40) / M)
+  close(costUsd('codex', { model: 'gpt-6.2-astra', input: 449862, cachedInput: 448384, cacheWrite: 0, output: 455 }), (1478 * 16 + 448384 * 0.8 + 455 * 60) / M)
+  close(costUsd('codex', { model: 'gpt-6.2-sol', input: 300000, cachedInput: 0, cacheWrite: 0, output: 0 }), (300000 * 4) / M)
 })
 
 test('Claude prices cache reads, 5-minute and 1-hour cache writes separately', () => {
