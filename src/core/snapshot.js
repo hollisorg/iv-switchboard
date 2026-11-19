@@ -10,6 +10,10 @@ const ENGINES = [
 ]
 
 const TOP_TASKS = 5
+// Claude Code shares its allowance only through a status line, which runs after replies in a terminal but
+// never in the Claude desktop app's Code tab. Once replies keep coming in more than this long after the
+// last reading, the reading is out of date. (Codex writes its reading into the log with every reply.)
+const STALE_AFTER_MS = 10 * 60000
 const MIN_ELAPSED_SHARE = 0.05 // too early in a window to forecast before 5% of it has passed
 
 function windowLabel(key, minutes) {
@@ -53,6 +57,19 @@ function engineReadings(limits, id, now) {
       }
     })
   }
+}
+
+// Claude Code replies logged after the reading, and whether the reading is out of date because of them.
+function staleness(all, id, observedAt) {
+  if (id !== 'claude' || !Number.isFinite(observedAt)) return { repliesSinceReading: 0, isStale: false }
+  let count = 0
+  let last = -Infinity
+  for (const x of all) {
+    if (x.engine !== id || !(x.at > observedAt)) continue
+    count++
+    if (x.at > last) last = x.at
+  }
+  return { repliesSinceReading: count, isStale: last - observedAt > STALE_AFTER_MS }
 }
 
 function periodStarts(now) {
@@ -150,7 +167,13 @@ export function buildSnapshot(store, now = Date.now()) {
 
   return {
     generatedAt: now,
-    engines: ENGINES.map(({ id, name }) => ({ id, name, ...engineReadings(limits, id, now) })),
+    engines: ENGINES.map(({ id, name }) => {
+      const readings = engineReadings(limits, id, now)
+      const stale = staleness(all, id, readings.observedAt)
+      // An out-of-date reading's pace is old too, so it makes no run-out forecast.
+      if (stale.isStale) readings.windows = readings.windows.map((w) => ({ ...w, runsOutAt: null }))
+      return { id, name, ...readings, ...stale }
+    }),
     periods
   }
 }

@@ -21,6 +21,46 @@ const EMPTY_NOTES = {
   hermes: 'Hermes has no allowance of its own. It uses the providers below.'
 }
 
+const NEXT_READING = { claude: 'your next reply in Claude Code in a terminal, or press Refresh' }
+
+// Claude's reading comes only from its status line, which the Claude desktop app's Code tab never runs.
+function StaleNote({ engine }) {
+  const n = engine.repliesSinceReading
+  return (
+    <p className="note stale-note" role="status">
+      <strong>Out of date:</strong> {n.toLocaleString('en-US')} {engine.name} {n === 1 ? 'reply' : 'replies'} since this
+      reading. The Code tab in the Claude desktop app doesn't share your allowance. Press Refresh to read it now, or send
+      one message from Claude Code in a terminal.
+    </p>
+  )
+}
+
+// Asks Claude Code itself for the allowance: one short Haiku message, only when pressed.
+function ClaudeRefresh({ primary }) {
+  const [busy, setBusy] = useState(false)
+  const [result, setResult] = useState(null)
+
+  async function refresh() {
+    setBusy(true)
+    setResult(null)
+    const r = await window.ivsb.refreshClaude()
+    setBusy(false)
+    setResult(r)
+  }
+
+  return (
+    <>
+      <div className="refresh-row">
+        <button className={`btn${primary ? ' btn-primary' : ''}`} disabled={busy} onClick={refresh}>
+          {busy ? 'Refreshing...' : 'Refresh'}
+        </button>
+        <span className="note">Asks Claude Code for your allowance. Uses one short Haiku message.</span>
+      </div>
+      {result && <p className={`message ${result.ok ? '' : 'bad'}`} role="status">{result.message}</p>}
+    </>
+  )
+}
+
 function Icon({ name }) {
   const paths = {
     eye: 'M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
@@ -34,7 +74,7 @@ function Icon({ name }) {
   )
 }
 
-function Window({ w, now }) {
+function Window({ w, now, nextReading }) {
   const left = leftPercent(w.usedPercent)
   // The bar shows what's left, like the number next to it: it shrinks as the window is used.
   const level = w.isOut || w.runsOutAt ? 'out' : left <= 20 ? 'warn' : ''
@@ -45,7 +85,9 @@ function Window({ w, now }) {
           <span className="mono">{w.label}</span>
           <span className="mono dim">reset</span>
         </div>
-        <p className="note">Reset {resetText(w.resetsAt, now).replace(/^Resets /, '')}. The new reading comes with your next reply.</p>
+        <p className="note">
+          Reset {resetText(w.resetsAt, now).replace(/^Resets /, '')}. The new reading comes with {nextReading}.
+        </p>
       </div>
     )
   }
@@ -86,7 +128,7 @@ function ClaudeConnect({ state, onChange }) {
   if (connected) {
     return (
       <>
-        <p className="note">Connected. Your Claude allowance appears after your next Claude Code reply.</p>
+        <p className="note">Connected. Your Claude allowance appears after your next reply in Claude Code in a terminal.</p>
         {message && !message.ok && <p className="message bad">{message.message}</p>}
       </>
     )
@@ -139,10 +181,16 @@ function EngineCard({ engine, usage, now, state, onState }) {
       {usage.unpricedTokens > 0 && usage.costUsd !== null && (
         <p className="note">{tokens(usage.unpricedTokens)} more tokens on models with no published price.</p>
       )}
-      {engine.windows.map((w) => (
-        <Window key={w.key} w={w} now={now} />
-      ))}
+      {engine.windows.length > 0 && (
+        <div className={`windows${engine.isStale ? ' stale' : ''}`}>
+          {engine.windows.map((w) => (
+            <Window key={w.key} w={w} now={now} nextReading={NEXT_READING[engine.id] || 'your next reply'} />
+          ))}
+        </div>
+      )}
       {engine.windows.length > 0 && engine.observedAt && <span className="mono dim">Reading {ago(engine.observedAt, now)}</span>}
+      {engine.isStale && <StaleNote engine={engine} />}
+      {engine.id === 'claude' && <ClaudeRefresh primary={engine.isStale} />}
       {!engine.windows.length && engine.id === 'claude' && <ClaudeConnect state={state} onChange={onState} />}
       {!engine.windows.length && engine.id !== 'claude' && <p className="note">{EMPTY_NOTES[engine.id]}</p>}
       {engine.id === 'hermes' && usage.providers?.length > 0 && (

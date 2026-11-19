@@ -20,5 +20,6 @@ contextBridge.exposeInMainWorld('ivsb', {
     return () => ipcRenderer.removeListener('ivsb:update-changed', listener)
   },
   connectClaude: () => ipcRenderer.invoke('ivsb:connect-claude'),
-  disconnectClaude: () => ipcRenderer.invoke('ivsb:disconnect-claude')
+  disconnectClaude: () => ipcRenderer.invoke('ivsb:disconnect-claude'),
+  refreshClaude: () => ipcRenderer.invoke('ivsb:refresh-claude')
 })

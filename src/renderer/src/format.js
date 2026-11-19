@@ -63,10 +63,10 @@ export function tooltip(snapshot) {
     if (e.id === 'hermes' && !e.windows.length) continue // Hermes has no allowance of its own
     const live = e.windows.filter((w) => !w.isPastReset)
     if (!e.windows.length) lines.push(`${e.name}: no reading yet`)
-    else if (!live.length) lines.push(`${e.name}: reset, new reading on next use`)
+    else if (!live.length) lines.push(`${e.name}: reset, ${e.isStale ? 'refresh from a terminal' : 'new reading on next use'}`)
     else {
       const tight = live.reduce((a, b) => (b.usedPercent > a.usedPercent ? b : a))
-      lines.push(`${e.name}: ${leftPercent(tight.usedPercent)}% of ${windowWords(tight.label)} left`)
+      lines.push(`${e.name}: ${leftPercent(tight.usedPercent)}% of ${windowWords(tight.label)} left${e.isStale ? ' (out of date)' : ''}`)
     }
   }
   return lines.join('\n').slice(0, 127)

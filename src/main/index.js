@@ -1,12 +1,13 @@
 // IV Switchboard main process: one instance, a tray icon whose tooltip shows what's left, a popover
 // that opens from the tray, and the background scanner. Connect and Disconnect Claude run only from
-// the popover's own buttons (after its confirmation), never on their own.
+// the popover's own buttons (after its confirmation), never on their own; so does Refresh Claude.
 import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { app, BrowserWindow, ipcMain, Menu, nativeImage, screen, shell, Tray } from 'electron'
 import { paths } from '../core/paths.js'
 import { claudeConnection, connectClaude, disconnectClaude } from '../core/claude-connect.js'
+import { findClaude, refreshClaude } from '../core/claude-refresh.js'
 import { tooltip } from '../renderer/src/format.js'
 import { startScanner } from './scanner.js'
 import { initUpdater, updateState } from './updater.js'
@@ -168,10 +169,27 @@ if (!app.requestSingleInstanceLock()) {
     }
     try {
       const r = connectClaude({ claudeHome: where.claudeHome, dataDir: where.dataDir, scriptSource: path.join(app.getAppPath(), 'resources', 'statusline.cjs') })
-      return { ok: true, message: r.already ? 'Already connected.' : 'Connected. Your Claude allowance appears after your next Claude Code reply.', state: state() }
+      return { ok: true, message: r.already ? 'Already connected.' : 'Connected. Your Claude allowance appears after your next Claude Code reply in a terminal, or press Refresh.', state: state() }
     } catch (err) {
       return { ok: false, message: err.message, state: state() }
     }
+  })
+  // One Refresh at a time: a second press while one runs gets the same answer.
+  let refreshing = null
+  ipcMain.handle('ivsb:refresh-claude', (e) => {
+    if (!fromPopover(e)) return { ok: false, message: 'Refused.' }
+    if (!refreshing) {
+      refreshing = refreshClaude({ dataDir: where.dataDir, bin: findClaude() })
+        .then((r) => {
+          console.log(`[ivsb] refresh claude: ${r.ok ? 'updated' : r.message}`)
+          if (r.ok) scanner?.scanNow()
+          return r
+        })
+        .finally(() => {
+          refreshing = null
+        })
+    }
+    return refreshing
   })
   ipcMain.handle('ivsb:disconnect-claude', (e) => {
     if (!fromPopover(e)) return { ok: false, message: 'Refused.' }

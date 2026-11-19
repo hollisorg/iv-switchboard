@@ -59,6 +59,27 @@ test('a window past its reset says so and makes no forecast; a full window is ou
   assert.deepEqual([week.isPastReset, week.isOut, week.runsOutAt], [false, true, null])
 })
 
+test('a Claude reading is out of date once replies keep coming more than 10 minutes after it', () => {
+  const s = store()
+  const observed = NOW - 2 * DAY
+  s.setLimit({ source: 'claude', window: 'seven_day', usedPercent: 60, windowMinutes: 10080, resetsAtMs: NOW + 3 * DAY, observedMs: observed })
+  s.setLimit({ source: 'codex', window: 'seven_day', usedPercent: 50, windowMinutes: 10080, resetsAtMs: NOW + 3 * DAY, observedMs: observed })
+  const claudeTurn = (key, atMs) => turn({ source: 'claude', turnKey: key, model: 'claude-opus-5-5', atMs })
+  s.addTurns([claudeTurn('before', observed - HOUR), claudeTurn('just-after', observed + 5 * 60000)])
+  let claude = engine(buildSnapshot(s, NOW), 'claude')
+  assert.deepEqual([claude.repliesSinceReading, claude.isStale], [1, false], 'a reply within 10 minutes of the reading')
+  assert.ok(claude.windows[0].runsOutAt, '60% two days into the week forecasts a run-out')
+  s.addTurns([claudeTurn('code-tab-1', NOW - DAY), claudeTurn('code-tab-2', NOW - HOUR), turn({ turnKey: 'codex-later', atMs: NOW - HOUR })])
+  const snap = buildSnapshot(s, NOW)
+  s.close()
+  claude = engine(snap, 'claude')
+  assert.deepEqual([claude.repliesSinceReading, claude.isStale], [3, true])
+  assert.equal(claude.windows[0].runsOutAt, null, 'no forecast from an out-of-date pace')
+  const codex = engine(snap, 'codex')
+  assert.deepEqual([codex.repliesSinceReading, codex.isStale], [0, false], 'Codex logs its reading with every reply')
+  assert.deepEqual([engine(snap, 'hermes').isStale, engine(snap, 'hermes').repliesSinceReading], [false, 0])
+})
+
 test('too early in a window to forecast', () => {
   const s = store()
   const resetsAt = NOW + WEEK - HOUR // one hour into the week

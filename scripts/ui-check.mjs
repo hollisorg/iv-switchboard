@@ -59,6 +59,7 @@ const taskLabels = (page) => page.$$eval('.task-label', (els) => els.map((e) => 
 
   const claude = await cardText(page, 'Claude Code')
   check('Claude: 5 hours 66% left, week 52% left, run-out shown', /66%/.test(claude) && /52%/.test(claude) && /RUNS OUT/i.test(claude))
+  check('a fresh Claude reading has no out-of-date note', !/Out of date/i.test(claude))
   const codex = await cardText(page, 'Codex')
   check('Codex: 28% left, Pro plan, run-out shown', /28%/.test(codex) && /\bpro\b/i.test(codex) && /RUNS OUT/i.test(codex))
   const hermes = await cardText(page, 'Hermes')
@@ -156,6 +157,56 @@ const taskLabels = (page) => page.$$eval('.task-label', (els) => els.map((e) => 
     check('Disconnect restores the settings file byte for byte', fs.readFileSync(settings, 'utf8') === original)
   }
   check('no page errors (run 2)', errors.length === 0, errors.join(' | '))
+  await app.close()
+}
+
+// ---------- run 3: a Claude reading from two days ago, with replies since (the Code tab case) ----------
+{
+  const env = demo('demo-run3')
+  const file = path.join(env.IV_SWITCHBOARD_DATA_DIR, 'claude-limits.json')
+  const reading = JSON.parse(fs.readFileSync(file, 'utf8'))
+  reading.observed_at -= 2 * 86400000
+  reading.five_hour.resets_at = Math.round((reading.observed_at + 2.5 * 3600000) / 1000)
+  fs.writeFileSync(file, JSON.stringify(reading))
+  // A stand-in for Claude Code that prints a made-up rate_limit_event and records how it was called.
+  const fakeDir = path.join(out, 'demo-run3', 'fake-claude')
+  fs.mkdirSync(fakeDir, { recursive: true })
+  const fakeScript = [
+    "import fs from 'node:fs'",
+    "fs.writeFileSync(new URL('./args.json', import.meta.url), JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd() }))",
+    'const resets = (h) => Math.round(Date.now() / 1000 + h * 3600)',
+    "console.log(JSON.stringify({ type: 'system', subtype: 'init' }))",
+    "console.log(JSON.stringify({ type: 'rate_limit_event', rate_limit_info: { status: 'allowed', unifiedWindows: { five_hour: { utilization: 0.12, resetsAt: resets(3) }, seven_day: { utilization: 0.61, resetsAt: resets(60) } } } }))",
+    "console.log(JSON.stringify({ type: 'result', subtype: 'success', result: 'OK' }))"
+  ].join('\n')
+  fs.writeFileSync(path.join(fakeDir, 'fake-claude.mjs'), fakeScript)
+  fs.writeFileSync(path.join(fakeDir, 'claude.cmd'), '@echo off\r\nnode "%~dp0fake-claude.mjs" %*\r\n')
+  env.IV_SWITCHBOARD_CLAUDE_BIN = path.join(fakeDir, 'claude.cmd')
+  const { app, page, errors } = await launch(env)
+  const claude = await cardText(page, 'Claude Code')
+  check('an old Claude reading says it is out of date and how to refresh it', /Out of date/i.test(claude) && /replies since this\s+reading/.test(claude) && /terminal/.test(claude), claude.replace(/\n/g, ' / '))
+  check('the reset 5-hour window points to a terminal for the next reading', /next reply in Claude Code in a terminal/.test(claude))
+  const faded = await page.$eval('section[aria-label="Claude Code"] .windows', (e) => getComputedStyle(e).opacity)
+  check('the out-of-date bars are faded', Number(faded) < 0.6, `opacity ${faded}`)
+  const codex = await cardText(page, 'Codex')
+  check('Codex is not marked out of date', !/Out of date/i.test(codex))
+  const tip = await app.evaluate(() => globalThis.ivsbTest.tooltip())
+  check('the tray tooltip marks Claude out of date', tip.includes('Claude Code: 52% of the week left (out of date)'), tip.replace(/\n/g, ' / '))
+  await page.screenshot({ path: path.join(out, 'claude-out-of-date.png') })
+
+  // Refresh asks the stand-in Claude Code and the card takes its reading.
+  await page.click('section[aria-label="Claude Code"] >> button:has-text("Refresh")')
+  await page.waitForSelector('section[aria-label="Claude Code"] >> text=Updated from Claude Code.', { timeout: 30000 })
+  await page.waitForFunction(() => !/Out of date/.test(document.querySelector('section[aria-label="Claude Code"]').innerText), null, { timeout: 15000 })
+  const after = await cardText(page, 'Claude Code')
+  check('Refresh brings in the new reading and clears the warning', /88%/.test(after) && /39%/.test(after) && !/Out of date/i.test(after), after.replace(/\n/g, ' / '))
+  const called = JSON.parse(fs.readFileSync(path.join(fakeDir, 'args.json'), 'utf8'))
+  check('Refresh runs one Haiku turn with no saved session', called.args.join(' ') === '-p Reply with the single word OK. --model haiku --output-format stream-json --verbose --no-session-persistence --max-turns 1', called.args.join(' '))
+  check('Refresh runs in its own empty folder', /iv-switchboard-claude-refresh$/.test(called.cwd), called.cwd)
+  const saved = JSON.parse(fs.readFileSync(file, 'utf8'))
+  check('Refresh saves only the two windows and the time', Object.keys(saved).sort().join(',') === 'five_hour,observed_at,seven_day')
+  await page.screenshot({ path: path.join(out, 'claude-refreshed.png') })
+  check('no page errors (run 3)', errors.length === 0, errors.join(' | '))
   await app.close()
 }
 

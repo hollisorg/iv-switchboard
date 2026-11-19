@@ -53,6 +53,10 @@ test('the tray tooltip names each agent app and its tightest window, and fits Wi
   assert.equal(tooltip(snap), 'IV Switchboard\nClaude Code: no reading yet\nCodex: 44% of the week left')
   snap.engines[0].windows = [{ label: '5 hours', usedPercent: 10, isPastReset: false }, { label: 'Week', usedPercent: 80, isPastReset: false }]
   assert.equal(tooltip(snap).split('\n')[1], 'Claude Code: 20% of the week left')
+  snap.engines[0].isStale = true
+  assert.equal(tooltip(snap).split('\n')[1], 'Claude Code: 20% of the week left (out of date)')
+  snap.engines[0].windows = [{ label: 'Week', usedPercent: 80, isPastReset: true }]
+  assert.equal(tooltip(snap).split('\n')[1], 'Claude Code: reset, refresh from a terminal')
   assert.equal(tooltip(null), 'IV Switchboard\nReading your usage...')
   assert.ok(tooltip(snap).length <= 127)
 })

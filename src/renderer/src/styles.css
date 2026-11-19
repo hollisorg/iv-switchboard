@@ -264,6 +264,25 @@ button:disabled {
   font-size: 13px;
 }
 
+.windows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* An out-of-date reading stays visible but faded, so it isn't read as today's figure. */
+.windows.stale {
+  opacity: 0.45;
+}
+
+.stale-note {
+  color: var(--paper);
+}
+
+.stale-note strong {
+  color: var(--pink);
+}
+
 .providers {
   display: flex;
   flex-direction: column;
@@ -432,4 +451,14 @@ button:disabled {
 
 .message.bad {
   color: var(--red);
+}
+
+.refresh-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.refresh-row .btn {
+  flex: none;
 }

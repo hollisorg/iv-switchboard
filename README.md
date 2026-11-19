@@ -31,7 +31,8 @@ The formats are described in [docs/data-sources.md](docs/data-sources.md).
 ## What it never does
 
 - It never sends your usage anywhere. The only thing it fetches from the internet is its own updates, from this
-  repository's releases.
+  repository's releases. The one exception is Refresh on the Claude card: it asks Claude Code to send Anthropic one
+  short message, and only when you press it.
 - It never reads or keeps your sign-ins.
 - It never keeps the text of your prompts or replies. Tasks are named by their title or folder, and the eye button
   hides even those for screenshots.
@@ -60,7 +61,17 @@ changes only that one setting. If you already had a status line, yours still sho
 Disconnect puts the file back exactly as it was. Connect Claude needs Node.js, which Claude Code users normally have.
 
 The reading refreshes whenever you use Claude Code in a terminal. The Claude desktop app's Code tab doesn't run status
-lines, so after a day spent only there the card shows the last reading and how old it is.
+lines, so once you've worked there since the last reading the card fades the bars, marks them out of date and counts the
+replies since.
+
+## Refresh Claude
+
+The Refresh button on the Claude card reads your allowance on the spot, with or without Connect. It runs Claude Code in
+the background with no window (`claude -p` on Haiku, one turn, no saved session) and keeps only the five-hour and
+weekly figures Claude Code reports. The reply is thrown away. Each press uses one short Haiku message from your
+allowance, so it only runs when you press it. It needs Claude Code installed and signed in to a Pro, Max or Ultra plan;
+Claude Code uses its own sign-in, and IV Switchboard never sees it. Any SessionStart hooks in your Claude settings run
+too, as they would when you start Claude Code.
 
 ## Uninstall
 
