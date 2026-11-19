@@ -83,6 +83,8 @@ const taskLabels = (page) => page.$$eval('.task-label', (els) => els.map((e) => 
   await page.waitForTimeout(200)
   const footVisible = await page.$eval('.foot', (e) => e.getBoundingClientRect().bottom <= innerHeight)
   check('the panel scrolls to the price note', footVisible)
+  const foot = await page.$eval('.foot', (e) => e.textContent.replace(/\s+/g, ' '))
+  check('the price note dates come from the price list', /\(read Nov 17 to Nov 18, 2026\)/.test(foot), foot)
   // Unpacked or dev, pointed at a throwaway data folder: never an updater, so the row says why.
   const updateRow = await page.$eval('.update-row', (e) => e.textContent).catch(() => '')
   const expectWords = exe ? 'updates come with the installed app' : 'development build'

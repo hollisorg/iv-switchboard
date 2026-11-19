@@ -1,7 +1,7 @@
 {
   "name": "iv-switchboard",
   "productName": "IV Switchboard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Infinite Variance tray meter: what's left on your Claude Code, Codex and Hermes, when it resets, and what each task used.",
   "author": "Infinite Variance",
   "license": "MIT",

@@ -53,6 +53,18 @@ export function ago(ms, now = Date.now()) {
   return `${d} day${d === 1 ? '' : 's'} ago`
 }
 
+// The days the providers' price pages were read (PRICE_SOURCES' YYYY-MM-DD dates): "Nov 17, 2026" when they
+// match, otherwise the first and last, such as "Nov 17 to Nov 18, 2026".
+export function priceReadText(sources) {
+  const days = [...new Set(sources.map((s) => s.read))].sort()
+  if (!days.length) return null
+  const day = (d, year) => new Date(`${d}T12:00:00Z`).toLocaleDateString(LOCALE, { timeZone: 'UTC', month: 'short', day: 'numeric', ...(year ? { year: 'numeric' } : {}) })
+  const first = days[0]
+  const last = days[days.length - 1]
+  if (first === last) return day(first, true)
+  return `${day(first, first.slice(0, 4) !== last.slice(0, 4))} to ${day(last, true)}`
+}
+
 const windowWords = (label) => (label === 'Week' ? 'the week' : label === '5 hours' ? 'the 5-hour window' : `the ${label} window`)
 
 // The tray tooltip: each agent app with a reading, by its tightest window. Windows caps it at 127 characters.

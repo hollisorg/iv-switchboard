@@ -1,6 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { ago, leftPercent, money, resetText, runsOutText, tokens, tooltip } from '../src/renderer/src/format.js'
+import { ago, leftPercent, money, priceReadText, resetText, runsOutText, tokens, tooltip } from '../src/renderer/src/format.js'
+import { PRICE_SOURCES } from '../src/core/prices.js'
+
+test('the price note gives the day the price pages were read, or the first and last day', () => {
+  assert.equal(priceReadText([{ read: '2026-11-17' }, { read: '2026-11-17' }]), 'Nov 17, 2026')
+  assert.equal(priceReadText([{ read: '2026-11-18' }, { read: '2026-11-17' }]), 'Nov 17 to Nov 18, 2026')
+  assert.equal(priceReadText([{ read: '2026-12-30' }, { read: '2027-01-02' }]), 'Dec 30, 2026 to Jan 2, 2027')
+  assert.equal(priceReadText([]), null)
+  assert.equal(priceReadText(PRICE_SOURCES), 'Nov 17 to Nov 18, 2026', 'the shipped price list')
+})
 
 const NOW = new Date(2026, 10, 17, 12, 0, 0).getTime() // Tuesday 17 Nov, noon local
 const at = (d, h, m = 0) => new Date(2026, 10, d, h, m, 0).getTime()

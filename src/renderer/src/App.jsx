@@ -1,7 +1,8 @@
 // The popover: what's left on Claude Code, Codex and Hermes, when each resets, whether it runs out
 // first, what each used at API prices for Today / 7 Days / 30 Days, and the top tasks.
 import { useEffect, useState } from 'react'
-import { ago, leftPercent, money, resetText, runsOutText, tokens } from './format.js'
+import { ago, leftPercent, money, priceReadText, resetText, runsOutText, tokens } from './format.js'
+import { PRICE_SOURCES } from '../../core/prices.js'
 import switchboardMark from './assets/switchboard-mark.png'
 
 const PERIODS = [
@@ -365,8 +366,8 @@ export default function App() {
             <UpdateRow update={state?.update} />
 
             <p className="note foot">
-              Costs are what the same use would cost at Anthropic, OpenAI and xAI API prices (read Nov 17, 2026), not what
-              your plans charge.
+              Costs are what the same use would cost at Anthropic, OpenAI and xAI API prices (read{' '}
+              {priceReadText(PRICE_SOURCES)}), not what your plans charge.
             </p>
           </>
         )}
