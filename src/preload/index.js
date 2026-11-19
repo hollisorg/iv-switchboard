@@ -1,7 +1,10 @@
 // The popover's bridge (window.ivsb). The main process accepts these calls only from the popover.
+import { newsletterBridge } from './newsletter'
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('ivsb', {
+  // The IV Newsletter signup (src/main/newsletter.js)
+  newsletter: newsletterBridge(ipcRenderer),
   getSnapshot: () => ipcRenderer.invoke('ivsb:snapshot'),
   getState: () => ipcRenderer.invoke('ivsb:state'),
   onSnapshot: (callback) => {

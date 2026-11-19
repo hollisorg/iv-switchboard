@@ -1,6 +1,7 @@
 // IV Switchboard main process: one instance, a tray icon whose tooltip shows what's left, a popover
 // that opens from the tray, and the background scanner. Connect and Disconnect Claude run only from
 // the popover's own buttons (after its confirmation), never on their own; so does Refresh Claude.
+import { createNewsletter, fileStore, registerNewsletter } from './newsletter'
 import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -144,6 +145,9 @@ if (!app.requestSingleInstanceLock()) {
     return { settings, update: updateState(), claude: claudeConnection({ claudeHome: where.claudeHome, dataDir: where.dataDir }), claudeSettingsFile: path.join(where.claudeHome, 'settings.json') }
   }
 
+  // The IV Newsletter (src/main/newsletter.js, shared by every IV app): sends only an address typed and joined,
+  // keeps only the join date. A copy with its own data folder (IV_SWITCHBOARD_DATA_DIR) is a test copy: it only sends to IV_NEWSLETTER_URL.
+  registerNewsletter(ipcMain, shell, createNewsletter({ app: 'iv-switchboard', version: app.getVersion(), store: fileStore(path.join(app.getPath('userData'), 'newsletter.json')), url: process.env.IV_SWITCHBOARD_DATA_DIR ? process.env.IV_NEWSLETTER_URL || 'http://127.0.0.1:9/iv-newsletter' : undefined }))
   ipcMain.handle('ivsb:snapshot', (e) => (fromPopover(e) ? snapshot : null))
   ipcMain.handle('ivsb:state', (e) => (fromPopover(e) ? state() : null))
   ipcMain.handle('ivsb:scan-now', (e) => {

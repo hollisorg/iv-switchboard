@@ -1,5 +1,6 @@
 // The popover: what's left on Claude Code, Codex and Hermes, when each resets, whether it runs out
 // first, what each used at API prices for Today / 7 Days / 30 Days, and the top tasks.
+import NewsletterBox from './components/NewsletterBox'
 import { useEffect, useState } from 'react'
 import { ago, leftPercent, money, priceReadText, resetText, runsOutText, tokens } from './format.js'
 import { PRICE_SOURCES } from '../../core/prices.js'
@@ -364,6 +365,9 @@ export default function App() {
               </div>
             )}
             <UpdateRow update={state?.update} />
+            <div className="newsletter-setting">
+              <NewsletterBox api={window.ivsb.newsletter} />
+            </div>
 
             <p className="note foot">
               Costs are what the same use would cost at Anthropic, OpenAI and xAI API prices (read{' '}

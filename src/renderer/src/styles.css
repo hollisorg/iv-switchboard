@@ -462,3 +462,7 @@ button:disabled {
 .refresh-row .btn {
   flex: none;
 }
+
+/* The IV Newsletter box (components/NewsletterBox.jsx) in Settings: its own block, never squeezed by the scroll column. */
+.newsletter-setting { flex-shrink: 0; padding: 6px 2px 2px; border-top: 1px solid var(--line); }
+.newsletter-setting .ivnl { --ivnl-accent: var(--red, #f44859); font-size: 13px; }
