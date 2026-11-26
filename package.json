@@ -18,6 +18,8 @@
     "start": "electron-vite preview",
     "test": "node --test --test-concurrency=1 \"test/*.test.mjs\"",
     "dist": "electron-vite build && electron-builder --win --x64 --publish never",
+    "dist:win-release": "node scripts/windows-release.cjs",
+    "release": "npm run dist:win-release",
     "dist:dir": "electron-vite build && electron-builder --win --x64 --dir --publish never"
   },
   "dependencies": {
